@@ -31,7 +31,8 @@ abstract contract ERC404MerkleClaim is IERC404MerkleClaim, Context {
     return false;
   }
 
-  // To use, override this function in your contract, call super.airdropMint(proof_) within your override function, then mint tokens.
+  // To use, override this function in your contract, call 
+  // super.airdropMint(proof_) within your override function, then mint tokens.
   function airdropMint(
     bytes32[] memory proof_,
     uint256 value_

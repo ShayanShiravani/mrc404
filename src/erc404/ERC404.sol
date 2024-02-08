@@ -1,8 +1,6 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import "hardhat/console.sol";
-
 import {DoubleEndedQueue} from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC404} from "./IERC404.sol";
@@ -291,12 +289,14 @@ abstract contract ERC404 is Context, IERC404 {
 
     _transferERC20(from, to, value);
 
-    // Skip _withdrawAndStoreERC721 and/or _retrieveOrMintERC721 for whitelisted addresses 1) to save gas, and 2) because whitelisted addresses won't always have/need NFTs corresponding to their ERC20s.
+    // Skip _withdrawAndStoreERC721 and/or _retrieveOrMintERC721 for whitelisted addresses 1) to save gas, 
+    // and 2) because whitelisted addresses won't always have/need NFTs corresponding to their ERC20s.
     if (whitelist[from] && whitelist[to]) {
       // Case 1) Both sender and recipient are whitelisted. No NFTs need to be transferred.
       // NOOP.
     } else if (whitelist[from]) {
-      // Case 2) The sender is whitelisted, but the recipient is not. Contract should not attempt to transfer NFTs from the sender, but the recipient should receive NFTs from the bank/minted.
+      // Case 2) The sender is whitelisted, but the recipient is not. Contract should not attempt to 
+      //         transfer NFTs from the sender, but the recipient should receive NFTs from the bank/minted.
       // Only cares about whole number increments.
       uint256 tokensToRetrieveOrMint = (balanceOf[to] / units) -
         (balanceBeforeReceiver / units);
@@ -304,7 +304,9 @@ abstract contract ERC404 is Context, IERC404 {
         _retrieveOrMintERC721(to);
       }
     } else if (whitelist[to]) {
-      // Case 3) The sender is not whitelisted, but the recipient is. Contract should attempt to withdraw and store NFTs from the sender, but the recipient should not receive NFTs from the bank/minted.
+      // Case 3) The sender is not whitelisted, but the recipient is. Contract should 
+      //         attempt to withdraw and store NFTs from the sender, but the recipient should not 
+      //         receive NFTs from the bank/minted.
       // Only cares about whole number increments.
       uint256 tokensToWithdrawAndStore = (balanceBeforeSender / units) -
         (balanceOf[from] / units);
@@ -316,8 +318,11 @@ abstract contract ERC404 is Context, IERC404 {
       // Strategy:
       // 1. First deal with the whole tokens. These are easy and will just be transferred.
       // 2. Look at the fractional part of the value:
-      //   a) If it causes the sender to lose a whole token that was represented by an NFT due to a fractional part being transferred, withdraw and store an additional NFT from the sender.
-      //   b) If it causes the receiver to gain a whole new token that should be represented by an NFT due to receiving a fractional part that completes a whole token, retrieve or mint an NFT to the recevier.
+      //   a) If it causes the sender to lose a whole token that was represented by an NFT 
+      //      due to a fractional part being transferred, withdraw and store an additional NFT from the sender.
+      //   b) If it causes the receiver to gain a whole new token that should be represented 
+      //      by an NFT due to receiving a fractional part that completes a whole token, retrieve 
+      //      or mint an NFT to the recevier.
 
       // Whole tokens worth of ERC20s get transferred as NFTs without any burning/minting.
       uint256 nftsToTransfer = value / units;
@@ -328,9 +333,15 @@ abstract contract ERC404 is Context, IERC404 {
         _transferERC721(from, to, tokenId);
       }
 
-      // If the sender's transaction changes their holding from a fractional to a non-fractional amount (or vice versa), adjust NFTs.
-      // Check if the send causes the sender to lose a whole token that was represented by an NFT due to a fractional part being transferred.
-      // To check this, look if subtracting the fractional amount from the balance causes the balance to drop below the original balance % units, which represents the number of whole tokens they started with.
+      // If the sender's transaction changes their holding from a fractional to a 
+      // non-fractional amount (or vice versa), adjust NFTs.
+      //
+      // Check if the send causes the sender to lose a whole token that was represented 
+      // by an NFT due to a fractional part being transferred.
+      //
+      // To check this, look if subtracting the fractional amount from the balance causes 
+      // the balance to drop below the original balance % units, which represents the number 
+      // of whole tokens they started with.
       uint256 fractionalAmount = value % units;
 
       if (
@@ -340,7 +351,8 @@ abstract contract ERC404 is Context, IERC404 {
         _withdrawAndStoreERC721(from);
       }
 
-      // Check if the receive causes the receiver to gain a whole new token that should be represented by an NFT due to receiving a fractional part that completes a whole token.
+      // Check if the receive causes the receiver to gain a whole new token that 
+      /// should be represented by an NFT due to receiving a fractional part that completes a whole token.
       if (
         (balanceBeforeReceiver + fractionalAmount) / units >
         (balanceBeforeReceiver / units)
@@ -353,7 +365,9 @@ abstract contract ERC404 is Context, IERC404 {
   }
 
   /// @notice Internal function for ERC20 minting
-  /// @dev This function will allow minting of new ERC20s up to the maxTotalSupplyERC20. If mintCorrespondingERC721s_ is true, it will also mint the corresponding ERC721s. Note that you cannot mint to the zero address, nor to this contract.
+  /// @dev This function will allow minting of new ERC20s up to the maxTotalSupplyERC20. If mintCorrespondingERC721s_ 
+  /// is true, it will also mint the corresponding ERC721s. Note that you cannot mint to the zero address,
+  /// nor to this contract.
   function _mintERC20(
     address to,
     uint256 value,
@@ -375,7 +389,8 @@ abstract contract ERC404 is Context, IERC404 {
     emit Transfer(address(0), to, value);
     emit ERC20Transfer(address(0), to, value);
 
-    // If mintCorrespondingERC721s_ is true, mint the corresponding ERC721s. This uses _retrieveOrMintERC721, which will first try to pull from the bank, and if the bank is empty, it will mint a new token.
+    // If mintCorrespondingERC721s_ is true, mint the corresponding ERC721s. This uses _retrieveOrMintERC721,  
+    // which will first try to pull from the bank, and if the bank is empty, it will mint a new token.
     if (mintCorrespondingERC721s_) {
       uint256 nftsToRetrieveOrMint = value / units;
       for (uint256 i = 0; i < nftsToRetrieveOrMint; i++) {
@@ -385,7 +400,8 @@ abstract contract ERC404 is Context, IERC404 {
   }
 
   /// @notice Internal function for ERC721 minting and retrieval from the bank.
-  /// @dev This function will allow minting of new ERC721s up to the maxTotalSupplyERC20. It will first try to pull from the bank, and if the bank is empty, it will mint a new token.
+  /// @dev This function will allow minting of new ERC721s up to the maxTotalSupplyERC20. It 
+  /// will first try to pull from the bank, and if the bank is empty, it will mint a new token.
   function _retrieveOrMintERC721(address to) internal virtual {
     if (to == address(0) || to == address(this)) {
       revert InvalidRecipient();

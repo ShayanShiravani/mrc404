@@ -1,0 +1,1 @@
+{"abi":[],"bytecode":{"object":"0x","linkReferences":{}},"deployedBytecode":{"object":"0x","linkReferences":{}},"ast":{"absolutePath":"src/mocks/MockERC721.sol","id":49130,"exportedSymbols":{},"nodeType":"SourceUnit","src":"32:25:36","nodes":[{"id":49129,"nodeType":"PragmaDirective","src":"32:24:36","nodes":[],"literals":["solidity","^","0.8",".20"]}],"license":"MIT"},"id":36}
