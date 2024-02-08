@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import {Test} from "forge-std/Test.sol";
 import {ExampleERC404} from "../src/examples/ExampleERC404.sol";
 
-contract PandoraTest is Test {
+contract ERC404Test is Test {
     // Test addresses
     address ALICE = address(0xc02Aaa39b223fE8d0a0e5C4F27EAd9022C756cC2);
     address BOB = address(0xC02Aaa39b223Fe8d0a0E5c4F27EAD9022c752cc2);
