@@ -6,7 +6,7 @@ import "hardhat/console.sol";
 import {DoubleEndedQueue} from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC404} from "./IERC404.sol";
-import {ERC721Receiver} from "../ERC721Receiver.sol";
+import {ERC721Receiver} from "../lib/ERC721Receiver.sol";
 
 abstract contract ERC404 is Context, IERC404 {
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
